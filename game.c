@@ -1,5 +1,19 @@
 #include "game.h"
 
+int IfWin() {
+	int count = 0;
+	for (int i = 0; i < 4; i++) {
+		for (int j = 0; j < 4; j++) {
+			if (arr[i][j] == count) 
+				count++;
+		}
+	}
+	if (count == 15) 
+		return 1;
+	else 
+		return 0;
+}
+
 void PrintAll() {
 		SDL_Texture *PlayUITexture = SDL_CreateTextureFromSurface(Renderer, PlayUISurface);
 		SDL_RenderCopy(Renderer, PlayUITexture, NULL, NULL);
@@ -24,10 +38,11 @@ void PrintTime() {
 void PrintBlocks() {
 	for (int i = 0; i < 4; i++) {
 		for (int j = 0; j < 4; j++) {
+			int index = arr[i][j];
 			BlockRect.x = 45 + 205 * j;
 			BlockRect.y = 345 + 205 * i;
 			SDL_Texture *BlockTexture = NULL;
-			BlockTexture = SDL_CreateTextureFromSurface(Renderer, BlockSurface[(arr[i][j])]);
+			BlockTexture = SDL_CreateTextureFromSurface(Renderer, BlockSurface[index]);
 			SDL_RenderCopy(Renderer, BlockTexture, NULL, &BlockRect);
 			SDL_DestroyTexture(BlockTexture);
 
@@ -36,15 +51,15 @@ void PrintBlocks() {
 }
 
 void RandomSwap() {
-	int temp;
-	for (int i = 0;	 i < 16; i++) {
-		int j = rand() % 3;
-		int k = rand() % 3;
-		temp = arr[j][k];
-		arr[j][k] = arr[j][k];
-		arr[j][k] = temp;
-	}
-	return;
+    int temp;
+    for (int i = 0;  i < 16; i++) {
+        int j = rand() % 4;
+        int k = rand() % 4;
+        temp = arr[j][k];
+        arr[j][k] = arr[i/4][i%4];
+        arr[i/4][i%4] = temp;
+    }
+    return;
 }
 
 void PlayUI() {
@@ -100,20 +115,9 @@ void Load() {
 	}
 	BlockRect.w = BlockSurface[0] -> w;
 	BlockRect.h = BlockSurface[0] -> h;
-	//for (int i = 0; i < 4; i++) {
-	//	for (int j = 0; j < 4; j++) {
-	//		printf("arr[%d][%d] = %d ",i ,j, arr[i][j]);
-	//	}
-	//	printf("\n");
-	//}
-	////RandomSwap();
-	//for (int i = 0; i < 4; i++) {
-	//	for (int j = 0; j < 4; j++) {
-	//		printf("arr[%d][%d] = %d ",i ,j, arr[i][j]);
-	//	}
-	//	printf("\n");
-	//}
-}
+	RandomSwap(arr);
+	}
+
 
 void Init() {
 	SDL_EventState(SDL_MOUSEMOTION, SDL_IGNORE);
