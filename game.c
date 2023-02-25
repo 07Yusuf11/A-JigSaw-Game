@@ -3,17 +3,17 @@
 void PrintAll() {
 		SDL_Texture *PlayUITexture = SDL_CreateTextureFromSurface(Renderer, PlayUISurface);
 		SDL_RenderCopy(Renderer, PlayUITexture, NULL, NULL);
-		SDL_RenderPresent(Renderer);
 		SDL_DestroyTexture(PlayUITexture);
 		PrintTime();
 		PrintBlocks();
+		SDL_RenderPresent(Renderer);
 }
 
 void PrintTime() {
 	EndTime = time(NULL);
-	int DurTime = (int) difftime(EndTime, StartTime);
-	sprintf(timechar, "%2d:%2d:%2d", DuraTime / 3600, (DuraTime / 60) % 60, DuraTime % 60);
-	SDL_Surface *WordSurface = TTF_RenderUTF8_Blended(Font, timechar, Fontcolor);
+	int DuraTime = (int) difftime(EndTime, StartTime);
+	sprintf(timechar, "%02d:%02d:%02d", DuraTime / 3600, (DuraTime / 60) % 60, DuraTime % 60);
+	SDL_Surface *WordSurface = TTF_RenderUTF8_Blended(Font, timechar, FontColor);
 	SDL_Texture *WordTexture = SDL_CreateTextureFromSurface(Renderer, WordSurface);
 	SDL_Rect TimeRect = {210, 210, WordSurface -> w, WordSurface ->h};
 	SDL_RenderCopy(Renderer, WordTexture, NULL, &TimeRect);
@@ -22,11 +22,29 @@ void PrintTime() {
 }
 
 void PrintBlocks() {
+	for (int i = 0; i < 4; i++) {
+		for (int j = 0; j < 4; j++) {
+			BlockRect.x = 45 + 205 * j;
+			BlockRect.y = 345 + 205 * i;
+			SDL_Texture *BlockTexture = NULL;
+			BlockTexture = SDL_CreateTextureFromSurface(Renderer, BlockSurface[(arr[i][j])]);
+			SDL_RenderCopy(Renderer, BlockTexture, NULL, &BlockRect);
+			SDL_DestroyTexture(BlockTexture);
 
+		}
+	}
 }
 
 void RandomSwap() {
-	
+	int temp;
+	for (int i = 0;	 i < 16; i++) {
+		int j = rand() % 3;
+		int k = rand() % 3;
+		temp = arr[j][k];
+		arr[j][k] = arr[j][k];
+		arr[j][k] = temp;
+	}
+	return;
 }
 
 void PlayUI() {
@@ -77,11 +95,24 @@ void Load() {
 	Font = TTF_OpenFont("image/FiraCode-Bold.ttf",45);
 	for(int i = 0; i < 16; i++) {
 		char FileName[20];
-		sprintf(FileName, "image/Block%d.png", i);
+		sprintf(FileName, "image/Block_%d.png", i);
 		BlockSurface[i] = IMG_Load(FileName);
 	}
 	BlockRect.w = BlockSurface[0] -> w;
 	BlockRect.h = BlockSurface[0] -> h;
+	//for (int i = 0; i < 4; i++) {
+	//	for (int j = 0; j < 4; j++) {
+	//		printf("arr[%d][%d] = %d ",i ,j, arr[i][j]);
+	//	}
+	//	printf("\n");
+	//}
+	////RandomSwap();
+	//for (int i = 0; i < 4; i++) {
+	//	for (int j = 0; j < 4; j++) {
+	//		printf("arr[%d][%d] = %d ",i ,j, arr[i][j]);
+	//	}
+	//	printf("\n");
+	//}
 }
 
 void Init() {
