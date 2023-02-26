@@ -1,5 +1,14 @@
 #include "game.h"
 
+void Printmsg() {
+	if (msg) {
+		SDL_Texture *msgTexture = SDL_CreateTextureFromSurface(Renderer, msgSurface);	
+		SDL_Rect msgRect = {30, 340, msgSurface -> w, msgSurface ->h };
+		SDL_RenderCopy(Renderer, msgTexture, NULL, &msgRect);
+		SDL_DestroyTexture(msgTexture);
+	}
+}
+
 void Swap() {
 	if (!arr[(whichtwo[2])][(whichtwo[3])]) {
 		int temp;
@@ -24,7 +33,7 @@ int IfWin() {
 				count++;
 		}
 	}
-	if (count == 16)
+	if (count == 15)
 		return 1;
 	else
 		return 0;
@@ -36,6 +45,7 @@ void PrintAll() {
 		SDL_DestroyTexture(PlayUITexture);
 		PrintTime();
 		PrintBlocks();
+		Printmsg();
 		SDL_RenderPresent(Renderer);
 }
 
@@ -93,7 +103,7 @@ void PlayUI() {
 					printf("(%d,%d) in Play UI\n", PlayEvent.button.x, PlayEvent.button.y);
 					int dx = abs(UpButtonX - DownButtonX);
 					int dy = abs(UpButtonY - DownButtonY);
-					if ((dy > 100 && dy < 400) || (dx > 100 && dx < 400) ) {
+					if ((dy > 200 && dy < 400) || (dx > 200 && dx < 400) ) {
 						which();
 						printf("Move from (%d,%d) to (%d,%d)\n",whichtwo[0], whichtwo[1], whichtwo[2], whichtwo[3]);
 						Swap();
@@ -137,6 +147,7 @@ void Load() {
 	Renderer = SDL_CreateRenderer(Window, -1, SDL_RENDERER_ACCELERATED);
 	StartBgSurface = IMG_Load("image/StartBg.png");
 	PlayUISurface = IMG_Load("image/PlayUI.png");
+	msgSurface = IMG_Load("image/youwin.png");
 	Font = TTF_OpenFont("image/FiraCode-Bold.ttf",45);
 	for(int i = 0; i < 16; i++) {
 		char FileName[20];
@@ -159,6 +170,7 @@ void Init() {
 void FreeAndQuit() {
 	SDL_FreeSurface(PlayUISurface);
 	SDL_FreeSurface(StartBgSurface);
+	SDL_FreeSurface(msgSurface);
 	SDL_DestroyWindow(Window);
 	SDL_DestroyRenderer(Renderer);
 	TTF_CloseFont(Font);
