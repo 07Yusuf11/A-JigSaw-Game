@@ -3,19 +3,22 @@
 void Printmsg() {
 	if (msg) {
 		SDL_Texture *msgTexture = SDL_CreateTextureFromSurface(Renderer, msgSurface);	
-		SDL_Rect msgRect = {30, 340, msgSurface -> w, msgSurface ->h };
+		SDL_Rect msgRect = {39, 340, msgSurface -> w, msgSurface ->h };
 		SDL_RenderCopy(Renderer, msgTexture, NULL, &msgRect);
 		SDL_DestroyTexture(msgTexture);
 	}
 }
 
 void Swap() {
-	if (!arr[(whichtwo[2])][(whichtwo[3])]) {
-		int temp;
-		temp = arr[(whichtwo[0])][(whichtwo[1])];
-		arr[(whichtwo[0])][(whichtwo[1])] = arr[(whichtwo[2])][(whichtwo[3])];
-		arr[(whichtwo[2])][(whichtwo[3])] = temp;
-	}
+		int diff = abs(whichtwo[2] + whichtwo[3] - whichtwo[0] - whichtwo[1]);
+		if(diff == 1) { 
+			if (!arr[(whichtwo[2])][(whichtwo[3])]) {
+				int temp;
+				temp = arr[(whichtwo[0])][(whichtwo[1])];
+				arr[(whichtwo[0])][(whichtwo[1])] = arr[(whichtwo[2])][(whichtwo[3])];
+				arr[(whichtwo[2])][(whichtwo[3])] = temp;
+			}
+		}
 }
 
 void which() {
@@ -33,7 +36,7 @@ int IfWin() {
 				count++;
 		}
 	}
-	if (count == 15)
+	if (count == 16)
 		return 1;
 	else
 		return 0;
@@ -91,31 +94,46 @@ void  RandomSwap() {
 void PlayUI() {
 	StartTime = time(NULL);
 	while (1) {
-		PrintAll();
-		while (SDL_PollEvent(&PlayEvent)) {
-			switch (PlayEvent.type) {
-				case SDL_QUIT:
-					FreeAndQuit();
-					break;
-				case SDL_MOUSEBUTTONUP:
-					UpButtonX = PlayEvent.button.x;
-					UpButtonY = PlayEvent.button.y;
-					printf("(%d,%d) in Play UI\n", PlayEvent.button.x, PlayEvent.button.y);
-					int dx = abs(UpButtonX - DownButtonX);
-					int dy = abs(UpButtonY - DownButtonY);
-					if ((dy > 200 && dy < 400) || (dx > 200 && dx < 400) ) {
-						which();
-						printf("Move from (%d,%d) to (%d,%d)\n",whichtwo[0], whichtwo[1], whichtwo[2], whichtwo[3]);
-						Swap();
-					}
-				case SDL_MOUSEBUTTONDOWN:
-					DownButtonX = PlayEvent.button.x;
-					DownButtonY = PlayEvent.button.y;
-					break;
-				default:
-					break;
+		if (!IfWin()) {
+			PrintAll();
+			while (SDL_PollEvent(&PlayEvent)) {
+				switch (PlayEvent.type) {
+					case SDL_QUIT:
+						FreeAndQuit();
+						break;
+					case SDL_MOUSEBUTTONUP:
+						UpButtonX = PlayEvent.button.x;
+						UpButtonY = PlayEvent.button.y;
+						printf("(%d,%d) in Play UI\n", PlayEvent.button.x, PlayEvent.button.y);
+						int dx = abs(UpButtonX - DownButtonX);
+						int dy = abs(UpButtonY - DownButtonY);
+						if ((dy > 0 && dy < 200) || (dx > 0 && dx < 200) ) {
+							which();
+							printf("Move from (%d,%d) to (%d,%d)\n",whichtwo[0], whichtwo[1], whichtwo[2], whichtwo[3]);
+							Swap();
+						}
+					case SDL_MOUSEBUTTONDOWN:
+						DownButtonX = PlayEvent.button.x;
+						DownButtonY = PlayEvent.button.y;
+						break;
+					default:
+						break;
+				}
 			}
 		}
+			else {
+				msg = 1;
+				PrintAll();
+				while (SDL_PollEvent(&PlayEvent)) {
+					switch (PlayEvent.type) {
+						case SDL_QUIT:
+							FreeAndQuit();
+							break;
+						default:
+							break;
+					}
+				}
+			}
 	}
 }
 
@@ -156,7 +174,7 @@ void Load() {
 	}
 	BlockRect.w = BlockSurface[0] -> w;
 	BlockRect.h = BlockSurface[0] -> h;
-	RandomSwap(arr);
+	//RandomSwap(arr);
 	}
 
 

@@ -20,6 +20,7 @@ void PrintAll();
 void PrintTime();
 void PrintBlocks();
 
+static int msg = 0;
 static int DownButtonX, DownButtonY, UpButtonX, UpButtonY;
 static char timechar[10];
 static time_t StartTime, EndTime; 
@@ -37,6 +38,7 @@ static SDL_Event PlayEvent;
 static SDL_Surface *StartBgSurface = NULL;
 static SDL_Surface *PlayUISurface = NULL;
 static SDL_Surface *BlockSurface[16] = {NULL};
+static SDL_Surface *msgSurface = NULL;
 static SDL_Window *Window = NULL;
 static SDL_Renderer *Renderer = NULL;
 static TTF_Font *Font = NULL;
