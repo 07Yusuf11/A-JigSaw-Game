@@ -1,16 +1,32 @@
 #include "game.h"
 
+void Swap() {
+	if (!arr[(whichtwo[2])][(whichtwo[3])]) {
+		int temp;
+		temp = arr[(whichtwo[0])][(whichtwo[1])];
+		arr[(whichtwo[0])][(whichtwo[1])] = arr[(whichtwo[2])][(whichtwo[3])];
+		arr[(whichtwo[2])][(whichtwo[3])] = temp;
+	}
+}
+
+void which() {
+	whichtwo[0] = (DownButtonY - 343) / 205;
+	whichtwo[1] = (DownButtonX - 43) / 205;
+	whichtwo[2] = (UpButtonY - 343) / 205;
+	whichtwo[3] = (UpButtonX - 43) / 205;
+}
+
 int IfWin() {
 	int count = 0;
 	for (int i = 0; i < 4; i++) {
 		for (int j = 0; j < 4; j++) {
-			if (arr[i][j] == count) 
+			if (count == arr[i][j])
 				count++;
 		}
 	}
-	if (count == 15) 
+	if (count == 16)
 		return 1;
-	else 
+	else
 		return 0;
 }
 
@@ -39,8 +55,8 @@ void PrintBlocks() {
 	for (int i = 0; i < 4; i++) {
 		for (int j = 0; j < 4; j++) {
 			int index = arr[i][j];
-			BlockRect.x = 45 + 205 * j;
-			BlockRect.y = 345 + 205 * i;
+			BlockRect.x = 43 + 205 * j;
+			BlockRect.y = 343 + 205 * i;
 			SDL_Texture *BlockTexture = NULL;
 			BlockTexture = SDL_CreateTextureFromSurface(Renderer, BlockSurface[index]);
 			SDL_RenderCopy(Renderer, BlockTexture, NULL, &BlockRect);
@@ -50,7 +66,7 @@ void PrintBlocks() {
 	}
 }
 
-void RandomSwap() {
+void  RandomSwap() {
     int temp;
     for (int i = 0;  i < 16; i++) {
         int j = rand() % 4;
@@ -70,9 +86,23 @@ void PlayUI() {
 			switch (PlayEvent.type) {
 				case SDL_QUIT:
 					FreeAndQuit();
-					return;
+					break;
 				case SDL_MOUSEBUTTONUP:
+					UpButtonX = PlayEvent.button.x;
+					UpButtonY = PlayEvent.button.y;
 					printf("(%d,%d) in Play UI\n", PlayEvent.button.x, PlayEvent.button.y);
+					int dx = abs(UpButtonX - DownButtonX);
+					int dy = abs(UpButtonY - DownButtonY);
+					if ((dy > 100 && dy < 400) || (dx > 100 && dx < 400) ) {
+						which();
+						printf("Move from (%d,%d) to (%d,%d)\n",whichtwo[0], whichtwo[1], whichtwo[2], whichtwo[3]);
+						Swap();
+					}
+				case SDL_MOUSEBUTTONDOWN:
+					DownButtonX = PlayEvent.button.x;
+					DownButtonY = PlayEvent.button.y;
+					break;
+				default:
 					break;
 			}
 		}
@@ -88,7 +118,7 @@ void Play() {
 		switch (MainEvent.type) {
 			case SDL_QUIT:
 				FreeAndQuit();
-				return;
+				break;
 			case SDL_MOUSEBUTTONUP:
 				printf("(%d,%d) in Main UI\n", MainEvent.button.x, MainEvent.button.y);
 				if (MainEvent.button.x > 220 && MainEvent.button.x < 670 && MainEvent.button.y > 495 && MainEvent.button.y < 700) {
