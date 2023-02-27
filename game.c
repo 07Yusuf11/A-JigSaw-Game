@@ -21,7 +21,7 @@ void Swap() {
 		}
 }
 
-void which() {
+void which() {		//Judge which two blocks will be swaped
 	whichtwo[0] = (DownButtonY - 343) / 205;
 	whichtwo[1] = (DownButtonX - 43) / 205;
 	whichtwo[2] = (UpButtonY - 343) / 205;
@@ -42,7 +42,7 @@ int IfWin() {
 		return 0;
 }
 
-void PrintAll() {
+void PrintAll() {	//Print all Elements.
 		SDL_Texture *PlayUITexture = SDL_CreateTextureFromSurface(Renderer, PlayUISurface);
 		SDL_RenderCopy(Renderer, PlayUITexture, NULL, NULL);
 		SDL_DestroyTexture(PlayUITexture);
@@ -53,8 +53,14 @@ void PrintAll() {
 }
 
 void PrintTime() {
-	EndTime = time(NULL);
-	int DuraTime = (int) difftime(EndTime, StartTime);
+	if (!IfWin()) {	//If win, EndTime will not be updated.
+		EndTime = time(NULL);
+		DuraTime = (int) difftime(EndTime, StartTime);
+	}
+	else {
+		time_t WinTime = EndTime;
+		DuraTime = (int) difftime(WinTime, StartTime);
+	}
 	sprintf(timechar, "%02d:%02d:%02d", DuraTime / 3600, (DuraTime / 60) % 60, DuraTime % 60);
 	SDL_Surface *WordSurface = TTF_RenderUTF8_Blended(Font, timechar, FontColor);
 	SDL_Texture *WordTexture = SDL_CreateTextureFromSurface(Renderer, WordSurface);
@@ -79,20 +85,60 @@ void PrintBlocks() {
 	}
 }
 
-void  RandomSwap() {
-    int temp;
-    for (int i = 0;  i < 16; i++) {
-        int j = rand() % 4;
-        int k = rand() % 4;
-        temp = arr[j][k];
-        arr[j][k] = arr[i/4][i%4];
-        arr[i/4][i%4] = temp;
-    }
-    return;
+void  RandomSwap() {	//Could only swaped with neighbor,otherwise there'll be no solution
+	int nowi = 0;
+	int nowj = 0;
+	int temp;
+	int i = 0;
+	while (i < 10000) {
+		int co = rand() % 2;
+		int ln;
+		if (co) {
+			ln = 0;
+			if (rand() > RAND_MAX / 2) {
+				if (nowj + co < 4) {
+					temp = arr[nowi][nowj];
+					arr[nowi][nowj] = arr[nowi][nowj + co];
+					arr[nowi][nowj + co] = temp;
+					nowj = nowj + co;
+				}
+			}
+			else {
+				if (nowj - co > -1) {
+						temp = arr[nowi][nowj];
+						arr[nowi][nowj] = arr[nowi][nowj - co];
+						arr[nowi][nowj - co] = temp;
+						nowj = nowj - co;
+				}
+			}
+		}
+		else {
+			ln = 1;
+			if (rand() > RAND_MAX / 2) {
+				if (nowi + ln < 4) {
+					temp = arr[nowi][nowj];
+					arr[nowi][nowj] = arr[nowi + ln][nowj];
+					arr[nowi + ln][nowj] = temp;
+					nowi = nowi + ln;
+				}
+			}
+			else {
+				if (nowi - ln > -1){
+					temp = arr[nowi][nowj];
+					arr[nowi][nowj] = arr[nowi - ln][nowj];
+					arr[nowi - ln][nowj] = temp;
+					nowi = nowi - ln;
+				}
+			}
+		}
+		i++;
+	}
 }
 
 void PlayUI() {
 	StartTime = time(NULL);
+	if (IfWin()) 
+		EndTime = time(NULL);
 	while (1) {
 		if (!IfWin()) {
 			PrintAll();
@@ -174,7 +220,7 @@ void Load() {
 	}
 	BlockRect.w = BlockSurface[0] -> w;
 	BlockRect.h = BlockSurface[0] -> h;
-	//RandomSwap(arr);
+	RandomSwap(arr);
 	}
 
 
