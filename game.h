@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <assert.h>
 #include <SDL2/SDL.h> 
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
@@ -18,11 +19,14 @@ void FreeAndQuit();
 void RandomSwap();
 void PrintAll();
 void PrintTime();
+void PrintBest();
 void PrintBlocks();
 
 static int msg = 0;
+static int DuraTime = 0;
 static int DownButtonX, DownButtonY, UpButtonX, UpButtonY;
 static char timechar[10];
+static char BestChar[10];
 static time_t StartTime, EndTime; 
 static int whichtwo[4];
 static int arr[4][4] = {

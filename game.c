@@ -1,5 +1,25 @@
 #include "game.h"
 
+void PrintBest() {
+	FILE *fp = fopen("best.dat","r");
+	assert(fp != NULL);
+	char c = fgetc(fp);
+	assert(fseek(fp, 0, SEEK_SET) != 1);
+	if (c == EOF) {
+		sprintf(BestChar, "--:--:--");
+	}
+	else {
+		assert(fgets(BestChar, 10, fp) != NULL);
+	}
+	SDL_Surface *BestSurface = TTF_RenderUTF8_Blended(Font, BestChar, FontColor);
+	SDL_Texture *BestTexture = SDL_CreateTextureFromSurface(Renderer, BestSurface);
+	SDL_Rect BestRect = {210, 280, BestSurface -> w, BestSurface -> h};
+	SDL_RenderCopy(Renderer, BestTexture, NULL, &BestRect);
+	SDL_FreeSurface(BestSurface);
+	SDL_DestroyTexture(BestTexture);
+	fclose(fp);
+}
+
 void Printmsg() {
 	if (msg) {
 		SDL_Texture *msgTexture = SDL_CreateTextureFromSurface(Renderer, msgSurface);	
@@ -47,6 +67,7 @@ void PrintAll() {	//Print all Elements.
 		SDL_RenderCopy(Renderer, PlayUITexture, NULL, NULL);
 		SDL_DestroyTexture(PlayUITexture);
 		PrintTime();
+		PrintBest();
 		PrintBlocks();
 		Printmsg();
 		SDL_RenderPresent(Renderer);
@@ -60,6 +81,28 @@ void PrintTime() {
 	else {
 		time_t WinTime = EndTime;
 		DuraTime = (int) difftime(WinTime, StartTime);
+		FILE *fp = fopen("best.dat", "r");	
+		assert(fp != NULL);
+		char c = fgetc(fp);
+		assert(fseek(fp, 0, SEEK_SET) != 1);
+		if (c != EOF) {
+			int hours, minutes, seconds, total_seconds;
+			assert(sscanf(BestChar, "%d:%d:%d", &hours, &minutes, &seconds) == 3);
+			total_seconds = hours * 3600 + minutes * 60 + seconds;
+			if (DuraTime < total_seconds) {
+				sprintf(BestChar, "%02d:%02d:%02d", DuraTime / 3600, (DuraTime / 60) % 60, DuraTime % 60);
+				fclose(fp);
+				FILE *fp = fopen("best.dat", "w");	
+				assert(fputs(BestChar, fp) != EOF);
+				fclose(fp);
+			}
+		}
+		else {
+			FILE *fp = fopen("best.dat", "w");
+			sprintf(BestChar, "%02d:%02d:%02d", DuraTime / 3600, (DuraTime / 60) % 60, DuraTime % 60);
+			assert(fputs(BestChar, fp) != EOF);
+			fclose(fp);
+		}
 	}
 	sprintf(timechar, "%02d:%02d:%02d", DuraTime / 3600, (DuraTime / 60) % 60, DuraTime % 60);
 	SDL_Surface *WordSurface = TTF_RenderUTF8_Blended(Font, timechar, FontColor);
