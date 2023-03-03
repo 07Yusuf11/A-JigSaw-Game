@@ -17,13 +17,17 @@ void Play();
 void PlayUI();
 void FreeAndQuit();
 void RandomSwap();
+void Remake();
+void Pause();
 void PrintAll();
 void PrintTime();
 void PrintBest();
 void PrintBlocks();
 
+static int pause = 0;
 static int msg = 0;
 static int DuraTime = 0;
+static int PauseTime = 0;
 static int DownButtonX, DownButtonY, UpButtonX, UpButtonY;
 static char timechar[10];
 static char BestChar[10];

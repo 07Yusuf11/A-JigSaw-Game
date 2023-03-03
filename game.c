@@ -1,5 +1,41 @@
 #include "game.h"
 
+void Pause() {
+	printf("Pause\n");
+	SDL_Event PauseEvent;
+	if (!pause) 
+		pause = 1;
+	if (pause) {
+		time_t PauseStartTime = EndTime;
+		DuraTime = (int) difftime(PauseStartTime, StartTime);	
+		while (SDL_WaitEvent(&PauseEvent)) {
+			switch(PauseEvent.type) {
+				case SDL_QUIT:
+					FreeAndQuit();
+					break;
+				case SDL_MOUSEBUTTONUP:
+					if ((PauseEvent.button.x > 650 && PauseEvent.button.x < 730) && (PauseEvent.button.y > 250 && PauseEvent.button.y < 320)) {
+						pause = 0;
+						time_t PauseEndTime = time(NULL);
+						PauseTime = (int) difftime(PauseEndTime, PauseStartTime);
+						return;
+					}
+					break;
+				case SDL_MOUSEBUTTONDOWN:
+						break;
+				default:
+					break;
+			}
+		}
+	}
+}
+
+void Remake() {
+	printf("Remake\n");
+	RandomSwap();
+	StartTime = time(NULL);
+}
+
 void PrintBest() {
 	FILE *fp = fopen("best.dat","r");
 	assert(fp != NULL);
@@ -74,36 +110,46 @@ void PrintAll() {	//Print all Elements.
 }
 
 void PrintTime() {
-	if (!IfWin()) {	//If win, EndTime will not be updated.
+	if (!IfWin() && !pause) {	//If win, EndTime will not be updated.
+		if (PauseTime) {
+			StartTime += (time_t) PauseTime;
+		}
 		EndTime = time(NULL);
 		DuraTime = (int) difftime(EndTime, StartTime);
 	}
 	else {
-		time_t WinTime = EndTime;
-		DuraTime = (int) difftime(WinTime, StartTime);
-		FILE *fp = fopen("best.dat", "r");	
-		assert(fp != NULL);
-		char c = fgetc(fp);
-		assert(fseek(fp, 0, SEEK_SET) != 1);
-		if (c != EOF) {
-			int hours, minutes, seconds, total_seconds;
-			assert(sscanf(BestChar, "%d:%d:%d", &hours, &minutes, &seconds) == 3);
-			total_seconds = hours * 3600 + minutes * 60 + seconds;
-			if (DuraTime < total_seconds) {
+		if (pause) {
+			time_t PauseStartTime = EndTime;
+			DuraTime = (int) difftime(PauseStartTime, StartTime);	
+		}
+		if (IfWin()) {
+			time_t WinTime = EndTime;
+			DuraTime = (int) difftime(WinTime, StartTime);
+			FILE *fp = fopen("best.dat", "r");	
+			assert(fp != NULL);
+			char c = fgetc(fp);
+			assert(fseek(fp, 0, SEEK_SET) != 1);
+			if (c != EOF) {
+				int hours, minutes, seconds, total_seconds;
+				assert(sscanf(BestChar, "%d:%d:%d", &hours, &minutes, &seconds) == 3);
+				total_seconds = hours * 3600 + minutes * 60 + seconds;
+				if (DuraTime < total_seconds) {
+					sprintf(BestChar, "%02d:%02d:%02d", DuraTime / 3600, (DuraTime / 60) % 60, DuraTime % 60);
+					fclose(fp);
+					FILE *fp = fopen("best.dat", "w");	
+					assert(fputs(BestChar, fp) != EOF);
+					fclose(fp);
+				}
+			}
+			else {
+				FILE *fp = fopen("best.dat", "w");
 				sprintf(BestChar, "%02d:%02d:%02d", DuraTime / 3600, (DuraTime / 60) % 60, DuraTime % 60);
-				fclose(fp);
-				FILE *fp = fopen("best.dat", "w");	
 				assert(fputs(BestChar, fp) != EOF);
 				fclose(fp);
 			}
 		}
-		else {
-			FILE *fp = fopen("best.dat", "w");
-			sprintf(BestChar, "%02d:%02d:%02d", DuraTime / 3600, (DuraTime / 60) % 60, DuraTime % 60);
-			assert(fputs(BestChar, fp) != EOF);
-			fclose(fp);
-		}
 	}
+	PauseTime = 0;
 	sprintf(timechar, "%02d:%02d:%02d", DuraTime / 3600, (DuraTime / 60) % 60, DuraTime % 60);
 	SDL_Surface *WordSurface = TTF_RenderUTF8_Blended(Font, timechar, FontColor);
 	SDL_Texture *WordTexture = SDL_CreateTextureFromSurface(Renderer, WordSurface);
@@ -163,6 +209,12 @@ void PlayUI() {
 							printf("Move from (%d,%d) to (%d,%d)\n",whichtwo[0], whichtwo[1], whichtwo[2], whichtwo[3]);
 							Swap();
 						}
+						if ((PlayEvent.button.x > 780 && PlayEvent.button.x < 825) && (PlayEvent.button.y > 275 && PlayEvent.button.y < 315)) 
+							Remake();
+						if ((PlayEvent.button.x > 650 && PlayEvent.button.x < 730) && (PlayEvent.button.y > 250 && PlayEvent.button.y < 320)) 
+							Pause();
+							SDL_FlushEvent(PlayEvent.type);
+						break;
 					case SDL_MOUSEBUTTONDOWN:
 						DownButtonX = PlayEvent.button.x;
 						DownButtonY = PlayEvent.button.y;
